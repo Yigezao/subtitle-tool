@@ -13,19 +13,19 @@
 ```bash
 python transcribe.py "D:\某处\音频.wav"
 python transcribe.py "音频.wav" --model large-v3 --language zh
-python transcribe.py "音频.wav" --prompt "托特, 羊脂球, 普鲁士军官" --max-chars 20
+python transcribe.py "音频.wav" --prompt "专有名词1, 专有名词2" --max-chars 20
 ```
 
 输出默认放在音频旁边，同名 `.srt` / `.txt`。
 
 ## 环境说明
 
-- 已安装 `faster-whisper 1.2.1` + `ctranslate2 4.8.2`
+- 依赖 `faster-whisper` + `ctranslate2`
 - 模型下载走 `hf-mirror.com`（Hugging Face 在国内连不上）
-- CUDA 需要 cuBLAS/cuDNN；脚本默认借用本机 Ming 的 torch 目录：
-  `D:\my_Software\Ming-3.0-TTS\venv\Lib\site-packages\torch\lib`
-  如果这个目录被移动，设置环境变量 `WHISPER_CUDA_LIB` 指向新的 `torch\lib`，或直接用 `--device cpu`（会慢很多）
-- 模型缓存：`C:\Users\15844\.cache\huggingface\hub\`
+- CUDA 需要 cuBLAS/cuDNN；脚本从环境变量 `WHISPER_CUDA_LIB` 指定的目录加载，例如：
+  `%VIRTUAL_ENV%\Lib\site-packages\torch\lib`
+  未设置时可用 `--device cpu`（会慢很多）
+- 模型缓存：`%USERPROFILE%\.cache\huggingface\hub\`
 
 ## 准确率提醒
 
@@ -44,13 +44,7 @@ python align_srt.py "音频.wav" "对应版本的口播稿.txt" --model medium
 
 注意：**txt 必须是这段音频用的那一版**。
 
-例：
-- 当前 `export\final.txt` 开头是「一辆马车，十个人…」
-- 但 Audacity 里那段 wav 开头是「托特那家旅店的院子里…」
-- 两版对不上，直接拿当前 final.txt 去对齐会错位。
+例：稿件改过版、而音频是按旧版录的，两者开头对不上，直接拿新版去对齐就会错位。
+这时改用与音频同版本的备份稿（如 `*.bak-<日期>`、`draft.vN.txt`），并只取与音频对应的那一段。
 
-这种情况下用旧版备份，例如：
-`data\books\羊脂球\export\final.txt.bak-20261025-111921`
-或者对应的 `draft.v10.txt` / `v11.txt`，而且只取与音频对应的那一段。
-
-工具只负责给已知文字找时间，不会改写文字；所以「羊脂球」「托特」不会再被识别成「羊之囚」「托特纳加」。
+工具只负责给已知文字找时间，不会改写文字；所以人名、书名这类专有名词不会再被识别成近似字。
